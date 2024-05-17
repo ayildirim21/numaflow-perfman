@@ -17,7 +17,7 @@ var rootCmd = &cobra.Command{
 	Long:  "Perfman is a command line utility for performance testing changes to the numaflow platform",
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
+// Execute adds all child commands to the root command and sets flags appropriately
 func Execute() {
 	err := rootCmd.Execute()
 	if err != nil {
@@ -29,7 +29,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 }
 
-// initConfig reads in config file and ENV variables if set.
+// initConfig reads in config file and ENV variables if set
 func initConfig() {
 	viper.SetConfigFile("./config/numaflow-perfman.yaml")
 
