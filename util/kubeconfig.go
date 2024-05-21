@@ -14,7 +14,7 @@ import (
 var KubeClient *kubernetes.Clientset
 var DynamicClient *dynamic.DynamicClient
 
-// K8sRestConfig returns a rest config for the kubernetes cluster
+// k8sRestConfig returns a rest config for the kubernetes cluster
 func k8sRestConfig() (*rest.Config, error) {
 	var restConfig *rest.Config
 	var err error
