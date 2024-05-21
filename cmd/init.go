@@ -9,7 +9,7 @@ import (
 	sv "github.com/ayildirim21/numaflow-perfman/service-monitors"
 )
 
-// setupCmd represents the setup command
+// initCmd represents the setup command
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Deploy necessary services",
