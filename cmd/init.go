@@ -15,13 +15,13 @@ var initCmd = &cobra.Command{
 	Short: "Deploy necessary services",
 	Long:  "The init command deploys Prometheus Operator as well as a couple Service Monitors onto the cluster",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := sv.CreateServiceMonitor("service-monitors/pipeline-metrics.yaml", logger); err != nil {
-			logger.Error("unable to create service monitor for pipeline metrics", zap.Error(err))
+		if err := sv.CreateServiceMonitor("service-monitors/pipeline-metrics.yaml", log, dynamicClient); err != nil {
+			log.Error("unable to create service monitor for pipeline metrics", zap.Error(err))
 			os.Exit(1)
 		}
 
-		if err := sv.CreateServiceMonitor("service-monitors/isbvc-jetstream-metrics.yaml", logger); err != nil {
-			logger.Error("unable to create service monitor for jetstream metrics", zap.Error(err))
+		if err := sv.CreateServiceMonitor("service-monitors/isbvc-jetstream-metrics.yaml", log, dynamicClient); err != nil {
+			log.Error("unable to create service monitor for jetstream metrics", zap.Error(err))
 			os.Exit(1)
 		}
 	},

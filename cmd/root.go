@@ -5,12 +5,16 @@ import (
 
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+	"k8s.io/client-go/dynamic"
+	"k8s.io/client-go/kubernetes"
 
 	"github.com/ayildirim21/numaflow-perfman/logging"
 	"github.com/ayildirim21/numaflow-perfman/util"
 )
 
-var logger *zap.Logger
+var kubeClient *kubernetes.Clientset
+var dynamicClient *dynamic.DynamicClient
+var log *zap.SugaredLogger
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -21,18 +25,26 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately
 func Execute() {
-	defer func() {
-		if err := logger.Sync(); err != nil {
-			logger.Error("failed to sync logger", zap.Error(err))
-		}
-	}()
-
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }
 
 func init() {
-	util.InitializeClients()
-	logger = logging.CreateLogger()
+	config, err := util.K8sRestConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	kubeClient, err = kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
+	dynamicClient, err = dynamic.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
+	log = logging.CreateLogger()
 }

@@ -10,7 +10,7 @@ import (
 // CommitSHA variable set at build time
 var CommitSHA string
 
-func CreateLogger() *zap.Logger {
+func CreateLogger() *zap.SugaredLogger {
 	debugMode, ok := os.LookupEnv("DEBUG")
 	isDebug := ok && debugMode == "true"
 	var encoderCfg zapcore.EncoderConfig
@@ -43,5 +43,5 @@ func CreateLogger() *zap.Logger {
 		},
 	}
 
-	return zap.Must(config.Build())
+	return zap.Must(config.Build()).Sugar()
 }
