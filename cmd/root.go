@@ -3,9 +3,8 @@ package cmd
 import (
 	"os"
 
-	"go.uber.org/zap"
-
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 
 	"github.com/ayildirim21/numaflow-perfman/logging"
 	"github.com/ayildirim21/numaflow-perfman/util"
@@ -22,8 +21,6 @@ var rootCmd = &cobra.Command{
 
 // Execute adds all child commands to the root command and sets flags appropriately
 func Execute() {
-	logger = logging.CreateLogger()
-
 	defer func() {
 		if err := logger.Sync(); err != nil {
 			logger.Error("failed to sync logger", zap.Error(err))
@@ -37,4 +34,5 @@ func Execute() {
 
 func init() {
 	util.InitializeClients()
+	logger = logging.CreateLogger()
 }
