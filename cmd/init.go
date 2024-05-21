@@ -1,10 +1,9 @@
 package cmd
 
 import (
-	"os"
+	"fmt"
 
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 
 	sv "github.com/ayildirim21/numaflow-perfman/service-monitors"
 )
@@ -14,16 +13,16 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Deploy necessary services",
 	Long:  "The init command deploys Prometheus Operator as well as a couple Service Monitors onto the cluster",
-	Run: func(cmd *cobra.Command, args []string) {
+	RunE: func(cmd *cobra.Command, args []string) error {
 		if err := sv.CreateServiceMonitor("service-monitors/pipeline-metrics.yaml", log, dynamicClient); err != nil {
-			log.Error("unable to create service monitor for pipeline metrics", zap.Error(err))
-			os.Exit(1)
+			return fmt.Errorf("unable to create service monitor for pipeline metrics: %w", err)
 		}
 
 		if err := sv.CreateServiceMonitor("service-monitors/isbvc-jetstream-metrics.yaml", log, dynamicClient); err != nil {
-			log.Error("unable to create service monitor for jetstream metrics", zap.Error(err))
-			os.Exit(1)
+			return fmt.Errorf("unable to create service monitor for jetstream metrics: %w", err)
 		}
+
+		return nil
 	},
 }
 
