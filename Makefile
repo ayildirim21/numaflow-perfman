@@ -4,6 +4,14 @@ COMMIT_SHA=$(shell git rev-parse HEAD)
 build:
 	CGO_ENABLED=0 GOARCH=amd64 go build -ldflags "-X github.com/ayildirim21/numaflow-perfman/logging.CommitSHA=$(COMMIT_SHA)" -v -o perfman main.go
 
+$(GOPATH)/bin/golangci-lint:
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b `go env GOPATH`/bin v1.54.1
+
+.PHONY: lint
+lint: $(GOPATH)/bin/golangci-lint
+	go mod tidy
+	golangci-lint run --fix --verbose --concurrency 4 --timeout 5m --enable goimports
+
 .PHONY: clean
 clean:
 	-rm perfman

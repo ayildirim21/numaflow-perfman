@@ -3,8 +3,9 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/cobra"
 	"go.uber.org/zap"
+
+	"github.com/spf13/cobra"
 
 	"github.com/ayildirim21/numaflow-perfman/logging"
 	"github.com/ayildirim21/numaflow-perfman/util"
@@ -27,7 +28,11 @@ func Execute() {
 		os.Exit(1)
 	}
 
-	defer logger.Sync()
+	defer func() {
+		if err := logger.Sync(); err != nil {
+			logger.Error("failed to sync logger", zap.Error(err))
+		}
+	}()
 }
 
 func init() {
