@@ -33,20 +33,17 @@ func Execute() {
 func init() {
 	config, err := util.K8sRestConfig()
 	if err != nil {
-		log.Error("failed to create rest config for cluster", zap.Error(err))
-		return
+		panic(err)
 	}
 
 	kubeClient, err = kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Error("failed to create kubernetes client", zap.Error(err))
-		return
+		panic(err)
 	}
 
 	dynamicClient, err = dynamic.NewForConfig(config)
 	if err != nil {
-		log.Error("failed to create dynamic client", zap.Error(err))
-		return
+		panic(err)
 	}
 
 	log = logging.CreateLogger()
