@@ -27,7 +27,7 @@ func readServiceMonitorFile(filename string) (*unstructured.Unstructured, error)
 	return &obj, nil
 }
 
-func CreateServiceMonitor(filename string, logger *zap.SugaredLogger, dynamicClient *dynamic.DynamicClient) error {
+func CreateServiceMonitor(filename string, logger *zap.Logger, dynamicClient *dynamic.DynamicClient) error {
 	serviceMonitor, err := readServiceMonitorFile(filename)
 	if err != nil {
 		panic(err)

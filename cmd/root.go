@@ -14,7 +14,7 @@ import (
 
 var kubeClient *kubernetes.Clientset
 var dynamicClient *dynamic.DynamicClient
-var log *zap.SugaredLogger
+var log *zap.Logger
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
