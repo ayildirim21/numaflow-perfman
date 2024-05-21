@@ -9,6 +9,10 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
+const (
+	DefaultNamespace = "default"
+)
+
 // K8sRestConfig returns a rest config for the kubernetes cluster
 func K8sRestConfig() (*rest.Config, error) {
 	var restConfig *rest.Config
