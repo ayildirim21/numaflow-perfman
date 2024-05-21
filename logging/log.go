@@ -11,7 +11,7 @@ import (
 var CommitSHA string
 
 func CreateLogger() *zap.Logger {
-	debugMode, ok := os.LookupEnv("DEBUG") // Use your environment variable name
+	debugMode, ok := os.LookupEnv("DEBUG")
 	isDebug := ok && debugMode == "true"
 	var encoderCfg zapcore.EncoderConfig
 
