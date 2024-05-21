@@ -24,15 +24,15 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	logger = logging.CreateLogger()
 
-	if err := rootCmd.Execute(); err != nil {
-		os.Exit(1)
-	}
-
 	defer func() {
 		if err := logger.Sync(); err != nil {
 			logger.Error("failed to sync logger", zap.Error(err))
 		}
 	}()
+
+	if err := rootCmd.Execute(); err != nil {
+		os.Exit(1)
+	}
 }
 
 func init() {
