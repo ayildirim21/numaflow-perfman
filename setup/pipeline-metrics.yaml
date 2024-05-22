@@ -7,7 +7,7 @@ metadata:
 spec:
   endpoints:
     - scheme: https
-      port: service-monitors
+      port: setup
       targetPort: 2469
       tlsConfig:
         insecureSkipVerify: true

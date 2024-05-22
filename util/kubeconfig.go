@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	DefaultNamespace = "default"
+	DefaultNamespace  = "default"
+	NumaflowNamespace = "numaflow-system"
 )
 
 // K8sRestConfig returns a rest config for the kubernetes cluster
