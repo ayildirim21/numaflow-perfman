@@ -35,7 +35,6 @@ var reportCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Printf("Dashboard created: ID %d, UID: %s, Title: %s, URL: %s\n", resp.ID, resp.UID, resp.Title, resp.URL)
 
 		// Fetch the dashboard
 		dashboardData, err = fetchDashboard(grafanaURL, auth, resp.UID)
@@ -76,9 +75,6 @@ func createDashboard(grafanaURL, auth string, dashboardData []byte) (DashboardRe
 	req.Header.Add("Content-Type", "application/json")
 
 	client := &http.Client{}
-
-	fmt.Println("Sending Dashboard Data:", string(dashboardData))
-
 	resp, err := client.Do(req)
 	if err != nil {
 		return response, err
@@ -86,9 +82,6 @@ func createDashboard(grafanaURL, auth string, dashboardData []byte) (DashboardRe
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
-
-	fmt.Println(string(body))
-
 	if err != nil {
 		return response, err
 	}
