@@ -50,8 +50,20 @@ var setupCmd = &cobra.Command{
 				Namespace: util.DefaultNamespace,
 			}
 			if err := isbGvro.CreateResource("setup/isbvc.yaml", dynamicClient, log); err != nil {
-				return fmt.Errorf("unable to create jetsream-isbvc: %w", err)
+				return fmt.Errorf("failed to create jetsream-isbvc: %w", err)
 			}
+		}
+
+		// Install prometheus operator
+		kubePrometheusChart := setup.ChartRelease{
+			ChartName:   "kube-prometheus",
+			ReleaseName: "perfman-kube-prometheus",
+			RepoUrl:     "https://charts.bitnami.com/bitnami",
+			Namespace:   util.DefaultNamespace,
+			Values:      nil,
+		}
+		if err := kubePrometheusChart.InstallOrUpgradeRelease(kubeClient, log); err != nil {
+			return fmt.Errorf("failed to install prometheus operator: %w", err)
 		}
 
 		// Install service monitors
@@ -62,10 +74,10 @@ var setupCmd = &cobra.Command{
 			Namespace: util.DefaultNamespace,
 		}
 		if err := svGvro.CreateResource("setup/pipeline-metrics.yaml", dynamicClient, log); err != nil {
-			return fmt.Errorf("unable to create service monitor for pipeline metrics: %w", err)
+			return fmt.Errorf("failed to create service monitor for pipeline metrics: %w", err)
 		}
 		if err := svGvro.CreateResource("setup/isbvc-jetstream-metrics.yaml", dynamicClient, log); err != nil {
-			return fmt.Errorf("unable to create service monitor for jetstream metrics: %w", err)
+			return fmt.Errorf("failed to create service monitor for jetstream metrics: %w", err)
 		}
 
 		return nil
