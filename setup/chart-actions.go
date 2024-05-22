@@ -12,7 +12,6 @@ import (
 	"helm.sh/helm/v3/pkg/chart"
 	"helm.sh/helm/v3/pkg/chart/loader"
 	"helm.sh/helm/v3/pkg/cli"
-	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -48,8 +47,6 @@ func InstallOrUpgradeRelease(releaseName string, repoUrl string, chartName strin
 		return fmt.Errorf("failed to get chart: %w", err)
 	}
 
-	var rel *release.Release
-
 	histClient := action.NewHistory(actionConfig)
 	histClient.Max = 1
 	if _, err := histClient.Run(releaseName); errors.Is(err, driver.ErrReleaseNotFound) {
@@ -58,22 +55,25 @@ func InstallOrUpgradeRelease(releaseName string, repoUrl string, chartName strin
 		clientInstall.Namespace = targetNamespace
 		clientInstall.ChartPathOptions = chartPathOptions
 
-		rel, err = clientInstall.Run(c, values)
+		rel, err := clientInstall.Run(c, values)
 		if err != nil {
 			return fmt.Errorf("failed to install %s: %w", repoUrl, err)
 		}
+
+		log.Info("installed chart successfully", zap.String("release-name", rel.Name), zap.String("release-namespace", rel.Namespace))
 	} else {
 		clientUpgrade := action.NewUpgrade(actionConfig)
 		clientUpgrade.Namespace = targetNamespace
 		clientUpgrade.ChartPathOptions = chartPathOptions
 
-		rel, err = clientUpgrade.Run(releaseName, c, values)
+		rel, err := clientUpgrade.Run(releaseName, c, values)
 		if err != nil {
 			return fmt.Errorf("failed to upgrade %s: %w", repoUrl, err)
 		}
+
+		log.Info("updated chart successfully", zap.String("release-name", rel.Name), zap.String("release-namespace", rel.Namespace))
 	}
 
-	log.Info("installed chart successfully", zap.String("release-name", rel.Name), zap.String("release-namespace", rel.Namespace))
 	return nil
 }
 
