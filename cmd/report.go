@@ -1,6 +1,11 @@
 package cmd
 
 import (
+	"encoding/base64"
+	"fmt"
+	"io/ioutil"
+	"net/http"
+
 	"github.com/spf13/cobra"
 )
 
@@ -9,9 +14,44 @@ var reportCmd = &cobra.Command{
 	Short: "Generate reporting dashboard snapshot url",
 	Long:  "The report command generates a url for user to open and see the snapshot of the reporting dashboard",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		print("dummy-url")
+		grafanaURL := "http://localhost:3000"
+		dashboardID := "admef4ycri77ka"
+		username := "admin"
+		password := "admin"
+
+		// Prepare for authentication
+		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+
+		// Fetch the dashboard
+		dashboardData, err := fetchDashboard(grafanaURL, auth, dashboardID)
+		if err != nil {
+			log.Error("Error fetching dashboard.")
+			return err
+		}
+		log.Info("Successfully fetched the dashboard.")
+		fmt.Println(string(dashboardData[:]))
+		fmt.Println("dummy-url")
 		return nil
 	},
+}
+
+func fetchDashboard(grafanaURL, auth, dashboardID string) ([]byte, error) {
+	// dashboardURL := fmt.Sprintf("%s/api/dashboards/db/%s", grafanaURL, dashboardName)
+	dashboardURL := fmt.Sprintf("%s/api/dashboards/uid/%s", grafanaURL, dashboardID)
+
+	req, _ := http.NewRequest("GET", dashboardURL, nil)
+	req.Header.Add("Authorization", "Basic "+auth)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return ioutil.ReadAll(resp.Body)
 }
 
 func init() {
