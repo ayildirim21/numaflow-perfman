@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -10,16 +11,24 @@ import (
 )
 
 var Numaflow bool
+var Jetstream bool
 
 // setupCmd represents the setup command
 var setupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Deploy necessary services",
 	Long:  "The setup command deploys Prometheus Operator as well as a couple Service Monitors onto the cluster",
+	Args: func(cmd *cobra.Command, args []string) error {
+		nonFlagArgs := cmd.Flags().Args()
+		if len(nonFlagArgs) > 0 {
+			return errors.New("this command doesn't accept args")
+		}
+
+		return nil
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Optionally install numaflow
-		numaflowFlag := cmd.Flag("numaflow")
-		if numaflowFlag.Changed {
+		if cmd.Flag("numaflow").Changed {
 			releaseName := "perfman-numaflow"
 			packagePath := "https://numaproj.io/helm-charts"
 			chartName := "numaflow"
@@ -28,13 +37,26 @@ var setupCmd = &cobra.Command{
 			}
 		}
 
+		// Optionally install ISB service
+		if cmd.Flag("jetstream").Changed {
+			isbGroup := "numaflow.numaproj.io"
+			isbResource := "interstepbufferservices"
+			isbPath := "setup/isbvc.yaml"
+			if err := util.CreateResource(isbPath, dynamicClient, util.DefaultNamespace, isbGroup, "v1alpha1", isbResource, log); err != nil {
+				return fmt.Errorf("unable to create jetsream-isbvc: %w", err)
+			}
+		}
+
 		// Install service monitors
+		svmGroup := "monitoring.coreos.com"
+		svmResource := "servicemonitors"
+
 		pipelineMetricsPath := "setup/pipeline-metrics.yaml"
-		if err := setup.CreateServiceMonitor(pipelineMetricsPath, dynamicClient, util.DefaultNamespace, log); err != nil {
+		if err := util.CreateResource(pipelineMetricsPath, dynamicClient, util.DefaultNamespace, svmGroup, "v1", svmResource, log); err != nil {
 			return fmt.Errorf("unable to create service monitor for pipeline metrics: %w", err)
 		}
 		jetstreamMetricsPath := "setup/isbvc-jetstream-metrics.yaml"
-		if err := setup.CreateServiceMonitor(jetstreamMetricsPath, dynamicClient, util.DefaultNamespace, log); err != nil {
+		if err := util.CreateResource(jetstreamMetricsPath, dynamicClient, util.DefaultNamespace, svmGroup, "v1", svmResource, log); err != nil {
 			return fmt.Errorf("unable to create service monitor for jetstream metrics: %w", err)
 		}
 
@@ -45,5 +67,6 @@ var setupCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(setupCmd)
 
-	setupCmd.Flags().BoolVarP(&Numaflow, "numaflow", "n", false, "Install or upgrade the numaflow system")
+	setupCmd.Flags().BoolVarP(&Numaflow, "numaflow", "n", false, "Install/upgrade the numaflow system")
+	setupCmd.Flags().BoolVarP(&Jetstream, "jetstream", "j", false, "Install jetsream as the InterStepBuffer service")
 }
