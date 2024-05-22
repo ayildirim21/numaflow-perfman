@@ -29,34 +29,42 @@ var setupCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Optionally install numaflow
 		if cmd.Flag("numaflow").Changed {
-			releaseName := "perfman-numaflow"
-			packagePath := "https://numaproj.io/helm-charts"
-			chartName := "numaflow"
-			if err := setup.InstallOrUpgradeRelease(releaseName, packagePath, chartName, nil, util.NumaflowNamespace, kubeClient, log); err != nil {
+			numaflowChart := setup.ChartRelease{
+				ChartName:   "numaflow",
+				ReleaseName: "perfman-numaflow",
+				RepoUrl:     "https://numaproj.io/helm-charts",
+				Namespace:   util.NumaflowNamespace,
+				Values:      nil,
+			}
+			if err := numaflowChart.InstallOrUpgradeRelease(kubeClient, log); err != nil {
 				return fmt.Errorf("unable to install numaflow: %w", err)
 			}
 		}
 
 		// Optionally install ISB service
 		if cmd.Flag("jetstream").Changed {
-			isbGroup := "numaflow.numaproj.io"
-			isbResource := "interstepbufferservices"
-			isbPath := "setup/isbvc.yaml"
-			if err := util.CreateResource(isbPath, dynamicClient, util.DefaultNamespace, isbGroup, "v1alpha1", isbResource, log); err != nil {
+			isbGvro := util.GVRObject{
+				Group:     "numaflow.numaproj.io",
+				Version:   "v1alpha1",
+				Resource:  "interstepbufferservices",
+				Namespace: util.DefaultNamespace,
+			}
+			if err := isbGvro.CreateResource("setup/isbvc.yaml", dynamicClient, log); err != nil {
 				return fmt.Errorf("unable to create jetsream-isbvc: %w", err)
 			}
 		}
 
 		// Install service monitors
-		svmGroup := "monitoring.coreos.com"
-		svmResource := "servicemonitors"
-
-		pipelineMetricsPath := "setup/pipeline-metrics.yaml"
-		if err := util.CreateResource(pipelineMetricsPath, dynamicClient, util.DefaultNamespace, svmGroup, "v1", svmResource, log); err != nil {
+		svGvro := util.GVRObject{
+			Group:     "monitoring.coreos.com",
+			Version:   "v1",
+			Resource:  "servicemonitors",
+			Namespace: util.DefaultNamespace,
+		}
+		if err := svGvro.CreateResource("setup/pipeline-metrics.yaml", dynamicClient, log); err != nil {
 			return fmt.Errorf("unable to create service monitor for pipeline metrics: %w", err)
 		}
-		jetstreamMetricsPath := "setup/isbvc-jetstream-metrics.yaml"
-		if err := util.CreateResource(jetstreamMetricsPath, dynamicClient, util.DefaultNamespace, svmGroup, "v1", svmResource, log); err != nil {
+		if err := svGvro.CreateResource("setup/isbvc-jetstream-metrics.yaml", dynamicClient, log); err != nil {
 			return fmt.Errorf("unable to create service monitor for jetstream metrics: %w", err)
 		}
 

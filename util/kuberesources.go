@@ -13,6 +13,13 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+type GVRObject struct {
+	Group     string
+	Version   string
+	Resource  string
+	Namespace string
+}
+
 func readYamlFile(filename string) (*unstructured.Unstructured, error) {
 	yamlFile, err := os.ReadFile(filename)
 	if err != nil {
@@ -27,14 +34,14 @@ func readYamlFile(filename string) (*unstructured.Unstructured, error) {
 	return &obj, nil
 }
 
-func CreateResource(filename string, dynamicClient *dynamic.DynamicClient, namespace string, group string, version string, resource string, logger *zap.Logger) error {
+func (gvro *GVRObject) CreateResource(filename string, dynamicClient *dynamic.DynamicClient, logger *zap.Logger) error {
 	obj, err := readYamlFile(filename)
 	if err != nil {
 		return fmt.Errorf("failed to read file for configuration information: %w", err)
 	}
 
-	gvr := schema.GroupVersionResource{Group: group, Version: version, Resource: resource}
-	result, err := dynamicClient.Resource(gvr).Namespace(namespace).Create(context.TODO(), obj, metav1.CreateOptions{})
+	gvr := schema.GroupVersionResource{Group: gvro.Group, Version: gvro.Version, Resource: gvro.Resource}
+	result, err := dynamicClient.Resource(gvr).Namespace(gvro.Namespace).Create(context.TODO(), obj, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create resource: %w", err)
 	}

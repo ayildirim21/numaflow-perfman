@@ -18,63 +18,12 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func InstallOrUpgradeRelease(releaseName string, repoUrl string, chartName string, values map[string]interface{}, targetNamespace string, kubeClient *kubernetes.Clientset, log *zap.Logger) error {
-	nsName := &v1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: targetNamespace,
-		},
-	}
-
-	if _, err := kubeClient.CoreV1().Namespaces().Get(context.TODO(), targetNamespace, metav1.GetOptions{}); err != nil {
-		// if namespace does not exist, create it
-		if _, err := kubeClient.CoreV1().Namespaces().Create(context.TODO(), nsName, metav1.CreateOptions{}); err != nil {
-			return fmt.Errorf("failed to create namespace %s: %w", targetNamespace, err)
-		}
-	}
-
-	settings := cli.New()
-	actionConfig := new(action.Configuration)
-	if err := actionConfig.Init(settings.RESTClientGetter(), targetNamespace, os.Getenv("HELM_DRIVER"), logger.Printf); err != nil {
-		return fmt.Errorf("failed to initialize actionConfig: %w", err)
-	}
-
-	chartPathOptions := action.ChartPathOptions{
-		RepoURL: repoUrl,
-	}
-
-	c, err := getChart(chartPathOptions, chartName, settings)
-	if err != nil {
-		return fmt.Errorf("failed to get chart: %w", err)
-	}
-
-	histClient := action.NewHistory(actionConfig)
-	histClient.Max = 1
-	if _, err := histClient.Run(releaseName); errors.Is(err, driver.ErrReleaseNotFound) {
-		clientInstall := action.NewInstall(actionConfig)
-		clientInstall.ReleaseName = releaseName
-		clientInstall.Namespace = targetNamespace
-		clientInstall.ChartPathOptions = chartPathOptions
-
-		rel, err := clientInstall.Run(c, values)
-		if err != nil {
-			return fmt.Errorf("failed to install %s: %w", repoUrl, err)
-		}
-
-		log.Info("installed chart successfully", zap.String("release-name", rel.Name), zap.String("release-namespace", rel.Namespace))
-	} else {
-		clientUpgrade := action.NewUpgrade(actionConfig)
-		clientUpgrade.Namespace = targetNamespace
-		clientUpgrade.ChartPathOptions = chartPathOptions
-
-		rel, err := clientUpgrade.Run(releaseName, c, values)
-		if err != nil {
-			return fmt.Errorf("failed to upgrade %s: %w", repoUrl, err)
-		}
-
-		log.Info("updated chart successfully", zap.String("release-name", rel.Name), zap.String("release-namespace", rel.Namespace))
-	}
-
-	return nil
+type ChartRelease struct {
+	ChartName   string
+	ReleaseName string
+	RepoUrl     string
+	Namespace   string
+	Values      map[string]interface{}
 }
 
 func getChart(chartPathOption action.ChartPathOptions, chartName string, settings *cli.EnvSettings) (*chart.Chart, error) {
@@ -89,4 +38,63 @@ func getChart(chartPathOption action.ChartPathOptions, chartName string, setting
 	}
 
 	return c, nil
+}
+
+func (cr *ChartRelease) InstallOrUpgradeRelease(kubeClient *kubernetes.Clientset, log *zap.Logger) error {
+	nsName := &v1.Namespace{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: cr.Namespace,
+		},
+	}
+
+	if _, err := kubeClient.CoreV1().Namespaces().Get(context.TODO(), cr.Namespace, metav1.GetOptions{}); err != nil {
+		// if namespace does not exist, create it
+		if _, err := kubeClient.CoreV1().Namespaces().Create(context.TODO(), nsName, metav1.CreateOptions{}); err != nil {
+			return fmt.Errorf("failed to create namespace %s: %w", cr.Namespace, err)
+		}
+	}
+
+	settings := cli.New()
+	actionConfig := new(action.Configuration)
+	if err := actionConfig.Init(settings.RESTClientGetter(), cr.Namespace, os.Getenv("HELM_DRIVER"), logger.Printf); err != nil {
+		return fmt.Errorf("failed to initialize actionConfig: %w", err)
+	}
+
+	chartPathOptions := action.ChartPathOptions{
+		RepoURL: cr.RepoUrl,
+	}
+
+	c, err := getChart(chartPathOptions, cr.ChartName, settings)
+	if err != nil {
+		return fmt.Errorf("failed to get chart: %w", err)
+	}
+
+	histClient := action.NewHistory(actionConfig)
+	histClient.Max = 1
+	if _, err := histClient.Run(cr.ReleaseName); errors.Is(err, driver.ErrReleaseNotFound) {
+		clientInstall := action.NewInstall(actionConfig)
+		clientInstall.ReleaseName = cr.ReleaseName
+		clientInstall.Namespace = cr.Namespace
+		clientInstall.ChartPathOptions = chartPathOptions
+
+		rel, err := clientInstall.Run(c, cr.Values)
+		if err != nil {
+			return fmt.Errorf("failed to install %s: %w", cr.RepoUrl, err)
+		}
+
+		log.Info("installed chart successfully", zap.String("release-name", rel.Name), zap.String("release-namespace", rel.Namespace))
+	} else {
+		clientUpgrade := action.NewUpgrade(actionConfig)
+		clientUpgrade.Namespace = cr.Namespace
+		clientUpgrade.ChartPathOptions = chartPathOptions
+
+		rel, err := clientUpgrade.Run(cr.ReleaseName, c, cr.Values)
+		if err != nil {
+			return fmt.Errorf("failed to upgrade %s: %w", cr.RepoUrl, err)
+		}
+
+		log.Info("updated chart successfully", zap.String("release-name", rel.Name), zap.String("release-namespace", rel.Namespace))
+	}
+
+	return nil
 }
