@@ -17,15 +17,29 @@ var reportCmd = &cobra.Command{
 	Long:  "The report command generates a url for user to open and see the snapshot of the reporting dashboard",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		grafanaURL := "http://localhost:3000"
-		dashboardID := "admef4ycri77ka"
+		// dashboardID := "admef4ycri77ka"
+		filePath := "cmd/template/dashboard-template.json" // the path to default dashboard template file.
 		username := "admin"
 		password := "admin"
 
 		// Prepare for authentication
 		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 
+		// Read dashboard template from JSON file
+		dashboardData, err := readJSONFile(filePath)
+		if err != nil {
+			return err
+		}
+
+		// Create Dashboard
+		resp, err := createDashboard(grafanaURL, auth, dashboardData)
+		if err != nil {
+			return err
+		}
+		fmt.Printf("Dashboard created: ID %d, UID: %s, Title: %s, URL: %s\n", resp.ID, resp.UID, resp.Title, resp.URL)
+
 		// Fetch the dashboard
-		dashboardData, err := fetchDashboard(grafanaURL, auth, dashboardID)
+		dashboardData, err = fetchDashboard(grafanaURL, auth, resp.UID)
 		if err != nil {
 			return err
 		}
@@ -39,6 +53,52 @@ var reportCmd = &cobra.Command{
 		fmt.Println(reportUrl)
 		return nil
 	},
+}
+
+type DashboardResponse struct {
+	ID    int    `json:"id"`
+	UID   string `json:"uid"`
+	Title string `json:"title"`
+	URL   string `json:"url"`
+}
+
+func readJSONFile(filePath string) ([]byte, error) {
+	return ioutil.ReadFile(filePath)
+}
+
+func createDashboard(grafanaURL, auth string, dashboardData []byte) (DashboardResponse, error) {
+	var response DashboardResponse
+	createURL := grafanaURL + "/api/dashboards/db"
+	req, err := http.NewRequest("POST", createURL, bytes.NewBuffer(dashboardData))
+	if err != nil {
+		return response, err
+	}
+	req.Header.Add("Authorization", "Basic "+auth)
+	req.Header.Add("Content-Type", "application/json")
+
+	client := &http.Client{}
+
+	fmt.Println("Sending Dashboard Data:", string(dashboardData))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return response, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	fmt.Println(string(body))
+
+	if err != nil {
+		return response, err
+	}
+
+	if err := json.Unmarshal(body, &response); err != nil {
+		return response, fmt.Errorf("error parsing JSON response: %v", err)
+	}
+
+	return response, nil
 }
 
 func fetchDashboard(grafanaURL, auth, dashboardID string) ([]byte, error) {
