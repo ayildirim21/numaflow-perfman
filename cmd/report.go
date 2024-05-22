@@ -17,8 +17,7 @@ var reportCmd = &cobra.Command{
 	Long:  "The report command generates a url for user to open and see the snapshot of the reporting dashboard",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		grafanaURL := "http://localhost:3000"
-		// dashboardID := "admef4ycri77ka"
-		filePath := "cmd/template/dashboard-template.json" // the path to default dashboard template file.
+		filePath := "cmd/default/dashboard-template.json" // the path to default dashboard template file.
 		username := "admin"
 		password := "admin"
 
