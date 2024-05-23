@@ -27,7 +27,7 @@
       {
         "datasource":{
           "type":"prometheus",
-          "uid":"Ub43gsvVk"
+          "uid":"prometheus-datasource-uid-placeholder"
         },
         "description":"Processing Rate for the last 5 minutes.",
         "fieldConfig":{
