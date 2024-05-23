@@ -7,11 +7,13 @@ import (
 	"go.uber.org/zap"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 
 	"github.com/ayildirim21/numaflow-perfman/logging"
 	"github.com/ayildirim21/numaflow-perfman/util"
 )
 
+var config *rest.Config
 var kubeClient *kubernetes.Clientset
 var dynamicClient *dynamic.DynamicClient
 var log *zap.Logger
@@ -31,7 +33,9 @@ func Execute() {
 }
 
 func init() {
-	config, err := util.K8sRestConfig()
+	var err error
+
+	config, err = util.K8sRestConfig()
 	if err != nil {
 		panic(err)
 	}
