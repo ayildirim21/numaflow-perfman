@@ -3,6 +3,7 @@ package cmd
 import (
 	"encoding/base64"
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -27,13 +28,33 @@ var reportCmd = &cobra.Command{
 		// Prepare for authentication
 		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 
+		// Create the Prometheus data source
+		dsId, err := report.CreateGrafanaDataSource(grafanaURL, auth)
+		if err != nil {
+			if strings.Contains(err.Error(), "data source with the same name already exists") {
+				log.Warn("Prometheus data source has already been configured.")
+				// Attempt to fetch the UID of the existing data source
+				dsId, err = report.FetchGrafanaDataSourceUID(grafanaURL, auth)
+				if err != nil {
+					return fmt.Errorf("error fetching existing data source UID: %w", err)
+				}
+			} else {
+				return fmt.Errorf("error creating data source: %w", err)
+			}
+		}
+
 		// Read dashboard template from JSON file
 		dashboardData, err := report.ReadJSONFile(filePath)
 		if err != nil {
 			return err
 		}
 
+		// Configure the dashboard template to read from the data source created above
+		dashboardData = []byte(strings.Replace(string(dashboardData), "prometheus-datasource-uid-placeholder", dsId, 1))
+
 		// Create Dashboard
+		// TODO - handle case when the dashboard already exists.
+		// (we should move data source and dashboard creation into setup and let report to only generate snapshot.)
 		resp, err := report.CreateDashboard(grafanaURL, auth, dashboardData)
 		if err != nil {
 			return err
