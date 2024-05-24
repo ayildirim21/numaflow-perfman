@@ -106,7 +106,7 @@ func CreateGrafanaDataSource(grafanaURL, auth string) (string, error) {
 	dataSource := map[string]interface{}{
 		"name":      "Numaflow-PerfMan-Prometheus",
 		"type":      "prometheus",
-		"url":       "http://localhost:9090",
+		"url":       "http://perfman-kube-prometheus-prometheus:9090",
 		"access":    "proxy",
 		"isDefault": false,
 	}
