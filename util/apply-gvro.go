@@ -37,7 +37,7 @@ func readYamlFile(filename string) (*unstructured.Unstructured, error) {
 func (gvro *GVRObject) CreateResource(filename string, dynamicClient *dynamic.DynamicClient, logger *zap.Logger) error {
 	obj, err := readYamlFile(filename)
 	if err != nil {
-		return fmt.Errorf("failed to read file for configuration information: %w", err)
+		return fmt.Errorf("failed to retrieve configuration information: %w", err)
 	}
 
 	gvr := schema.GroupVersionResource{Group: gvro.Group, Version: gvro.Version, Resource: gvro.Resource}
