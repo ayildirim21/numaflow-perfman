@@ -54,7 +54,7 @@ var reportCmd = &cobra.Command{
 		}
 
 		// Configure the dashboard template to read from the data source created above
-		dashboardData = []byte(strings.Replace(string(dashboardData), "prometheus-datasource-uid-placeholder", dsId, 1))
+		dashboardData = []byte(strings.Replace(string(dashboardData), "prometheus-datasource-uid-placeholder", dsId, -1))
 
 		// Create Dashboard
 		// TODO - handle case when the dashboard already exists.
