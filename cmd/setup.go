@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/ayildirim21/numaflow-perfman/setup"
 	"github.com/ayildirim21/numaflow-perfman/util"
 )
 
@@ -28,7 +29,7 @@ var setupCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Optionally install numaflow
 		if cmd.Flag("numaflow").Changed {
-			numaflowChart := util.ChartRelease{
+			numaflowChart := setup.ChartRelease{
 				ChartName:   "numaflow",
 				ReleaseName: "perfman-numaflow",
 				RepoUrl:     "https://numaproj.io/helm-charts",
@@ -54,7 +55,7 @@ var setupCmd = &cobra.Command{
 		}
 
 		// Install prometheus operator
-		kubePrometheusChart := util.ChartRelease{
+		kubePrometheusChart := setup.ChartRelease{
 			ChartName:   "kube-prometheus",
 			ReleaseName: "perfman-kube-prometheus",
 			RepoUrl:     "https://charts.bitnami.com/bitnami",
@@ -66,7 +67,7 @@ var setupCmd = &cobra.Command{
 		}
 
 		// Install Grafana
-		grafanaChart := util.ChartRelease{
+		grafanaChart := setup.ChartRelease{
 			ChartName:   "grafana",
 			ReleaseName: "perfman-grafana",
 			RepoUrl:     "https://grafana.github.io/helm-charts",
