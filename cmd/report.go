@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 
 	"github.com/ayildirim21/numaflow-perfman/report"
 	"github.com/ayildirim21/numaflow-perfman/util"
@@ -21,16 +20,13 @@ var reportCmd = &cobra.Command{
 		grafanaURL := "http://localhost:3000"
 		filePath := "default/dashboard-template.json" // the path to default dashboard template file.
 		username := "admin"
-		password, err := report.GetAdminPassword(kubeClient, util.PerfmanNamespace, "perfman-grafana", "admin-password")
+		grafanaPassword, err := report.GetAdminPassword(kubeClient, util.DefaultNamespace, "perfman-grafana", "admin-password")
+
 		if err != nil {
 			return err
 		}
-
-		// TODO: password should be stored securely
-		log.Info("successfully retrieved password", zap.String("password", password))
-
 		// Prepare for authentication
-		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
+		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + grafanaPassword))
 
 		// Create the Prometheus data source
 		dsId, err := report.CreateGrafanaDataSource(grafanaURL, auth)
@@ -54,7 +50,7 @@ var reportCmd = &cobra.Command{
 		}
 
 		// Configure the dashboard template to read from the data source created above
-		dashboardData = []byte(strings.Replace(string(dashboardData), "prometheus-datasource-uid-placeholder", dsId, 1))
+		dashboardData = []byte(strings.Replace(string(dashboardData), "prometheus-datasource-uid-placeholder", dsId, -1))
 
 		// Create Dashboard
 		// TODO - handle case when the dashboard already exists.

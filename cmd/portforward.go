@@ -7,11 +7,13 @@ import (
 	"sync"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/cli-runtime/pkg/genericiooptions"
 
 	"github.com/ayildirim21/numaflow-perfman/portforward"
+	"github.com/ayildirim21/numaflow-perfman/report"
 	"github.com/ayildirim21/numaflow-perfman/util"
 )
 
@@ -122,6 +124,13 @@ var portforwardCmd = &cobra.Command{
 					panic(err)
 				}
 			}()
+
+			grafanaPassword, err := report.GetAdminPassword(kubeClient, util.DefaultNamespace, "perfman-grafana", "admin-password")
+			if err != nil {
+				return err
+			}
+
+			log.Info("successfully retrieved grafana password", zap.String("password", grafanaPassword))
 
 			<-grafanaPf.ReadyCh
 
