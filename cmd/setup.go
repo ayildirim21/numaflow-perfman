@@ -66,6 +66,18 @@ var setupCmd = &cobra.Command{
 			return fmt.Errorf("failed to install prometheus operator: %w", err)
 		}
 
+		// Install Grafana
+		grafanaChart := setup.ChartRelease{
+			ChartName:   "grafana",
+			ReleaseName: "perfman-grafana",
+			RepoUrl:     "https://grafana.github.io/helm-charts",
+			Namespace:   util.DefaultNamespace,
+			Values:      nil,
+		}
+		if err := grafanaChart.InstallOrUpgradeRelease(kubeClient, log); err != nil {
+			return fmt.Errorf("unable to install grafana: %w", err)
+		}
+
 		// Install service monitors
 		svGvro := setup.GVRObject{
 			Group:     "monitoring.coreos.com",
@@ -80,18 +92,6 @@ var setupCmd = &cobra.Command{
 
 		if err := svGvro.CreateResource("setup/isbvc-jetstream-metrics.yaml", dynamicClient, log); err != nil {
 			return fmt.Errorf("failed to create service monitor for jetstream metrics: %w", err)
-		}
-
-		// Install Grafana
-		grafanaChart := setup.ChartRelease{
-			ChartName:   "grafana",
-			ReleaseName: "perfman-grafana",
-			RepoUrl:     "https://grafana.github.io/helm-charts",
-			Namespace:   util.DefaultNamespace,
-			Values:      nil,
-		}
-		if err := grafanaChart.InstallOrUpgradeRelease(kubeClient, log); err != nil {
-			return fmt.Errorf("unable to install grafana: %w", err)
 		}
 
 		return nil
