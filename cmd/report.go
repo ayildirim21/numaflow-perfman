@@ -20,13 +20,10 @@ var reportCmd = &cobra.Command{
 		grafanaURL := "http://localhost:3000"
 		filePath := "default/dashboard-template.json" // the path to default dashboard template file.
 		username := "admin"
-		grafanaPassword, err := report.GetAdminPassword(kubeClient, util.PerfmanNamespace, "perfman-grafana", "admin-password")
-		if err != nil {
-			return err
-		}
+		password := util.GrafanaPassword
 
 		// Prepare for authentication
-		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + grafanaPassword))
+		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
 
 		// Create the Prometheus data source
 		dsId, err := report.CreateGrafanaDataSource(grafanaURL, auth)

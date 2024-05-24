@@ -67,12 +67,17 @@ var setupCmd = &cobra.Command{
 		}
 
 		// Install Grafana
+		// TODO: figure out how to sync k8s secret with updated password
+		// recommended way of changing password is not through web UI, but updating grafana deployment with helm
+		// and setting new password
 		grafanaChart := setup.ChartRelease{
 			ChartName:   "grafana",
 			ReleaseName: "perfman-grafana",
 			RepoUrl:     "https://grafana.github.io/helm-charts",
 			Namespace:   util.PerfmanNamespace,
-			Values:      nil,
+			Values: map[string]interface{}{
+				"adminPassword": util.GrafanaPassword,
+			},
 		}
 		if err := grafanaChart.InstallOrUpgradeRelease(kubeClient, log); err != nil {
 			return fmt.Errorf("unable to install grafana: %w", err)

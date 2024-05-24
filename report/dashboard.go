@@ -2,15 +2,11 @@ package report
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
-
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 
 	"github.com/ayildirim21/numaflow-perfman/util"
 )
@@ -196,14 +192,4 @@ func FetchGrafanaDataSourceUID(grafanaURL, auth string) (string, error) {
 	}
 
 	return "", fmt.Errorf("data source not found: %s", "Numaflow-PerfMan-Prometheus")
-}
-
-func GetAdminPassword(kubeClient *kubernetes.Clientset, namespace string, serviceName string, secretKey string) (string, error) {
-	secret, err := kubeClient.CoreV1().Secrets(namespace).Get(context.TODO(), serviceName, metav1.GetOptions{})
-	if err != nil {
-		return "", fmt.Errorf("unable to retrieve password: %w", err)
-	}
-
-	data := secret.Data[secretKey]
-	return string(data), nil
 }
