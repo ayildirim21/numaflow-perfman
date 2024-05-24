@@ -46,13 +46,9 @@ func CreateDashboard(grafanaURL, auth string, dashboardData []byte) (DashboardRe
 		return response, err
 	}
 
-	fmt.Println(string(body))
-
 	if err := json.Unmarshal(body, &response); err != nil {
 		return response, fmt.Errorf("error parsing JSON response: %v", err)
 	}
-
-	fmt.Println(response)
 
 	return response, nil
 }
