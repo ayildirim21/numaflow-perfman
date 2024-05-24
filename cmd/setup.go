@@ -17,7 +17,7 @@ var Jetstream bool
 var setupCmd = &cobra.Command{
 	Use:   "setup",
 	Short: "Deploy necessary services",
-	Long:  "The setup command deploys Prometheus Operator as well as a couple Service Monitors onto the cluster",
+	Long:  "The setup command deploys Prometheus Operator, Grafana, and Service Monitors onto the cluster",
 	Args: func(cmd *cobra.Command, args []string) error {
 		nonFlagArgs := cmd.Flags().Args()
 		if len(nonFlagArgs) > 0 {
@@ -43,13 +43,13 @@ var setupCmd = &cobra.Command{
 
 		// Optionally install ISB service
 		if cmd.Flag("jetstream").Changed {
-			isbGvro := setup.GVRObject{
+			isbGvro := util.GVRObject{
 				Group:     "numaflow.numaproj.io",
 				Version:   "v1alpha1",
 				Resource:  "interstepbufferservices",
 				Namespace: util.DefaultNamespace,
 			}
-			if err := isbGvro.CreateResource("setup/isbvc.yaml", dynamicClient, log); err != nil {
+			if err := isbGvro.CreateResource("default/isbvc.yaml", dynamicClient, log); err != nil {
 				return fmt.Errorf("failed to create jetsream-isbvc: %w", err)
 			}
 		}
@@ -79,18 +79,18 @@ var setupCmd = &cobra.Command{
 		}
 
 		// Install service monitors
-		svGvro := setup.GVRObject{
+		svGvro := util.GVRObject{
 			Group:     "monitoring.coreos.com",
 			Version:   "v1",
 			Resource:  "servicemonitors",
 			Namespace: util.DefaultNamespace,
 		}
 		// TODO: check if service monitors exist before applying them
-		if err := svGvro.CreateResource("setup/pipeline-metrics.yaml", dynamicClient, log); err != nil {
+		if err := svGvro.CreateResource("default/pipeline-metrics.yaml", dynamicClient, log); err != nil {
 			return fmt.Errorf("failed to create service monitor for pipeline metrics: %w", err)
 		}
 
-		if err := svGvro.CreateResource("setup/isbvc-jetstream-metrics.yaml", dynamicClient, log); err != nil {
+		if err := svGvro.CreateResource("default/isbvc-jetstream-metrics.yaml", dynamicClient, log); err != nil {
 			return fmt.Errorf("failed to create service monitor for jetstream metrics: %w", err)
 		}
 

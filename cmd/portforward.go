@@ -72,7 +72,7 @@ var portforwardCmd = &cobra.Command{
 				ReadyCh:   prometheusReadyCh,
 			}
 
-			portforward.TerminatePortForward(prometheusStopCh, &prometheusWg)
+			portforward.WaitForTermination(prometheusStopCh, &prometheusWg)
 
 			go func() {
 				err := prometheusPf.PortForwardAPod()
@@ -93,6 +93,7 @@ var portforwardCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("unable to find a pod for the service: %w", err)
 			}
+
 			var grafanaWg sync.WaitGroup
 			grafanaWg.Add(1)
 			grafanaStopCh := make(chan struct{}, 1)
@@ -113,7 +114,7 @@ var portforwardCmd = &cobra.Command{
 				ReadyCh:   grafanaReadyCh,
 			}
 
-			portforward.TerminatePortForward(grafanaStopCh, &grafanaWg)
+			portforward.WaitForTermination(grafanaStopCh, &grafanaWg)
 
 			go func() {
 				err := grafanaPf.PortForwardAPod()
