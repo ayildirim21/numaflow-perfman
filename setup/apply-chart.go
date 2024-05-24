@@ -41,7 +41,7 @@ func getChart(chartPathOption action.ChartPathOptions, chartName string, setting
 	return c, nil
 }
 
-func createNamespace(kubeClient *kubernetes.Clientset, namespace string, ns *v1.Namespace, log *zap.Logger) error {
+func createNamespace(kubeClient *kubernetes.Clientset, namespace string, nso *v1.Namespace, log *zap.Logger) error {
 	_, err := kubeClient.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
 	if err == nil {
 		log.Info("namespace already exists", zap.String("namespace", namespace))
@@ -52,7 +52,7 @@ func createNamespace(kubeClient *kubernetes.Clientset, namespace string, ns *v1.
 		return fmt.Errorf("failed to get namespace %s: %w", namespace, err)
 	}
 
-	if _, err := kubeClient.CoreV1().Namespaces().Create(context.TODO(), ns, metav1.CreateOptions{}); err != nil {
+	if _, err := kubeClient.CoreV1().Namespaces().Create(context.TODO(), nso, metav1.CreateOptions{}); err != nil {
 		return fmt.Errorf("failed to create namespace %s: %w", namespace, err)
 	}
 
@@ -60,13 +60,13 @@ func createNamespace(kubeClient *kubernetes.Clientset, namespace string, ns *v1.
 }
 
 func (cr *ChartRelease) InstallOrUpgradeRelease(kubeClient *kubernetes.Clientset, log *zap.Logger) error {
-	ns := &v1.Namespace{
+	namespaceObject := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: cr.Namespace,
 		},
 	}
 
-	if err := createNamespace(kubeClient, cr.Namespace, ns, log); err != nil {
+	if err := createNamespace(kubeClient, cr.Namespace, namespaceObject, log); err != nil {
 		return err
 	}
 

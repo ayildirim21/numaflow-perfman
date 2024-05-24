@@ -130,7 +130,7 @@ var portforwardCmd = &cobra.Command{
 				return err
 			}
 
-			log.Info("successfully retrieved grafana password", zap.String("password", grafanaPassword))
+			log.Info("successfully retrieved grafana password. Make sure to change password after logging in", zap.String("password", grafanaPassword))
 
 			<-grafanaPf.ReadyCh
 
