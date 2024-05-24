@@ -1,5 +1,6 @@
 package util
 
+// TODO: use viper for configuration management, especially for password
 const (
 	// Namespaces
 	PerfmanNamespace  = "default"
