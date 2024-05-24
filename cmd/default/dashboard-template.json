@@ -1,156 +1,221 @@
 {
   "dashboard":{
-    "annotations":{
-      "list":[
+    "annotations": {
+      "list": [
         {
-          "builtIn":1,
-          "datasource":{
-            "type":"grafana",
-            "uid":"-- Grafana --"
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
           },
-          "enable":true,
-          "hide":true,
-          "iconColor":"rgba(0, 211, 255, 1)",
-          "name":"Annotations & Alerts",
-          "type":"dashboard"
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
         }
       ]
     },
-    "editable":true,
-    "fiscalYearStartMonth":0,
-    "graphTooltip":0,
-    "id":null,
-    "links":[
-
-    ],
-    "panels":[
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "panels": [
       {
-        "datasource":{
-          "type":"prometheus",
-          "uid":"prometheus-datasource-uid-placeholder"
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus-datasource-uid-placeholder"
         },
-        "description":"Processing Rate for the last 5 minutes.",
-        "fieldConfig":{
-          "defaults":{
-            "color":{
-              "mode":"palette-classic"
+        "description": "Source Processing Rate - Number of messages per second.",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
             },
-            "custom":{
-              "axisBorderShow":false,
-              "axisCenteredZero":false,
-              "axisColorMode":"text",
-              "axisLabel":"",
-              "axisPlacement":"auto",
-              "barAlignment":0,
-              "drawStyle":"line",
-              "fillOpacity":0,
-              "gradientMode":"none",
-              "hideFrom":{
-                "legend":false,
-                "tooltip":false,
-                "viz":false
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "no. of messages per second",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "line",
+              "fillOpacity": 0,
+              "gradientMode": "none",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
               },
-              "insertNulls":false,
-              "lineInterpolation":"linear",
-              "lineWidth":1,
-              "pointSize":5,
-              "scaleDistribution":{
-                "type":"linear"
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
               },
-              "showPoints":"auto",
-              "spanNulls":false,
-              "stacking":{
-                "group":"A",
-                "mode":"none"
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
               },
-              "thresholdsStyle":{
-                "mode":"off"
+              "thresholdsStyle": {
+                "mode": "off"
               }
             },
-            "mappings":[
-
-            ],
-            "thresholds":{
-              "mode":"absolute",
-              "steps":[
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
                 {
-                  "color":"green",
-                  "value":null
-                },
-                {
-                  "color":"red",
-                  "value":80
+                  "color": "green",
+                  "value": null
                 }
               ]
             }
           },
-          "overrides":[
-
-          ]
+          "overrides": []
         },
-        "gridPos":{
-          "h":19,
-          "w":23,
-          "x":0,
-          "y":0
+        "gridPos": {
+          "h": 10,
+          "w": 11,
+          "x": 0,
+          "y": 0
         },
-        "id":1,
-        "options":{
-          "legend":{
-            "calcs":[
-
-            ],
-            "displayMode":"list",
-            "placement":"bottom",
-            "showLegend":true
+        "id": 1,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
           },
-          "tooltip":{
-            "mode":"single",
-            "sort":"none"
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
           }
         },
-        "targets":[
+        "targets": [
           {
-            "datasource":{
-              "type":"prometheus",
-              "uid":"Ub43gsvVk"
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus-datasource-uid-placeholder"
             },
-            "disableTextWrap":false,
-            "editorMode":"builder",
-            "expr":"rate(forwarder_data_read_total{namespace=\"default\", pipeline=\"simple-pipeline\", vertex=\"p1\"}[5m])",
-            "fullMetaSearch":false,
-            "includeNullMetadata":false,
-            "instant":false,
-            "legendFormat":"__auto",
-            "range":true,
-            "refId":"A",
-            "useBackend":false
+            "disableTextWrap": false,
+            "editorMode": "builder",
+            "expr": "rate(forwarder_data_read_total{namespace=\"$namespace\", pipeline=\"$pipeline\", vertex=\"$vertex\"}[$__rate_interval])",
+            "fullMetaSearch": false,
+            "includeNullMetadata": false,
+            "instant": false,
+            "legendFormat": "__auto",
+            "range": true,
+            "refId": "A",
+            "useBackend": false
           }
         ],
-        "title":"P1 Throughput(no. of messages per second)",
-        "type":"timeseries"
+        "title": "Inbound Messages(TPS)",
+        "type": "timeseries"
       }
     ],
-    "schemaVersion":39,
-    "tags":[
-
-    ],
-    "templating":{
-      "list":[
-
+    "schemaVersion": 39,
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "default",
+            "value": "default"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-datasource-uid-placeholder"
+          },
+          "definition": "label_values(namespace)",
+          "hide": 0,
+          "includeAll": false,
+          "multi": false,
+          "name": "namespace",
+          "options": [],
+          "query": {
+            "qryType": 1,
+            "query": "label_values(namespace)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          },
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": false,
+            "text": "simple-pipeline",
+            "value": "simple-pipeline"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-datasource-uid-placeholder"
+          },
+          "definition": "label_values({namespace=~\"$namespace\"},pipeline)",
+          "hide": 0,
+          "includeAll": false,
+          "multi": false,
+          "name": "pipeline",
+          "options": [],
+          "query": {
+            "qryType": 1,
+            "query": "label_values({namespace=~\"$namespace\"},pipeline)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          },
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        },
+        {
+          "current": {
+            "selected": true,
+            "text": "input",
+            "value": "input"
+          },
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-datasource-uid-placeholder"
+          },
+          "definition": "label_values({namespace=~\"$namespace\", pipeline=~\"$pipeline\"},vertex)",
+          "hide": 0,
+          "includeAll": false,
+          "multi": false,
+          "name": "vertex",
+          "options": [],
+          "query": {
+            "qryType": 1,
+            "query": "label_values({namespace=~\"$namespace\", pipeline=~\"$pipeline\"},vertex)",
+            "refId": "PrometheusVariableQueryEditor-VariableQuery"
+          },
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "sort": 0,
+          "type": "query"
+        }
       ]
     },
-    "time":{
-      "from":"now-5m",
-      "to":"now"
+    "time": {
+      "from": "now-5m",
+      "to": "now"
     },
-    "timePicker":{
-
-    },
-    "timezone":"browser",
-    "title":"perfman-dashboard",
-    "uid":null,
-    "weekStart":""
+    "timepicker": {},
+    "timezone": "browser",
+    "title": "perfman-dashboard",
+    "uid": null,
+    "version": 7,
+    "weekStart": ""
   },
   "folderId":0,
   "overwrite":false
