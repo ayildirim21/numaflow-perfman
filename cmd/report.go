@@ -51,7 +51,11 @@ var reportCmd = &cobra.Command{
 		// TODO - handle case when the dashboard already exists.
 		// (we should move data source and dashboard creation into setup and let report to only generate snapshot.)
 		resp, err := report.CreateDashboard(grafanaURL, auth, dashboardData)
+
+		fmt.Printf("dashboard id: %s", resp.UID)
+
 		if err != nil {
+			fmt.Printf("error %v\n", err)
 			return err
 		}
 
