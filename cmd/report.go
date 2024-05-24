@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 
 	"github.com/ayildirim21/numaflow-perfman/report"
 	"github.com/ayildirim21/numaflow-perfman/util"
@@ -24,6 +25,9 @@ var reportCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		// TODO: password should be stored securely
+		log.Info("successfully retrieved password", zap.String("password", password))
 
 		// Prepare for authentication
 		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))
