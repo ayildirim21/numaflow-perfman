@@ -86,7 +86,7 @@ var portforwardCmd = &cobra.Command{
 			prometheusWg.Wait()
 		}
 
-		// Port forward prometheus operator so that it can be used as a source in the Grafana dashboard
+		// Port forward Grafana
 		if cmd.Flag("grafana").Changed {
 			serviceName := "perfman-grafana"
 			podName, err := portforward.GetPodFromService(kubeClient, util.DefaultNamespace, serviceName)
