@@ -6,8 +6,10 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 
 	"github.com/ayildirim21/numaflow-perfman/report"
+	"github.com/ayildirim21/numaflow-perfman/util"
 )
 
 var reportCmd = &cobra.Command{
@@ -15,10 +17,17 @@ var reportCmd = &cobra.Command{
 	Short: "Generate reporting dashboard snapshot url",
 	Long:  "The report command generates a url for user to open and see the snapshot of the reporting dashboard",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		// TODO: can all be moved to viper configuration
 		grafanaURL := "http://localhost:3000"
-		filePath := "cmd/default/dashboard-template.json" // the path to default dashboard template file.
+		filePath := "default/dashboard-template.json" // the path to default dashboard template file.
 		username := "admin"
-		password := "admin"
+		password, err := report.GetAdminPassword(kubeClient, util.DefaultNamespace, "perfman-grafana", "admin-password")
+		if err != nil {
+			return err
+		}
+
+		// TODO: password should be stored securely
+		log.Info("successfully retrieved password", zap.String("password", password))
 
 		// Prepare for authentication
 		auth := base64.StdEncoding.EncodeToString([]byte(username + ":" + password))

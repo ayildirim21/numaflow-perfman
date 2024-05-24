@@ -9,7 +9,6 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 
-	"github.com/ayildirim21/numaflow-perfman/logging"
 	"github.com/ayildirim21/numaflow-perfman/util"
 )
 
@@ -50,5 +49,5 @@ func init() {
 		panic(err)
 	}
 
-	log = logging.CreateLogger()
+	log = util.CreateLogger()
 }

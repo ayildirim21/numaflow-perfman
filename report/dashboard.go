@@ -2,10 +2,15 @@ package report
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 type DashboardResponse struct {
@@ -16,7 +21,7 @@ type DashboardResponse struct {
 }
 
 func ReadJSONFile(filePath string) ([]byte, error) {
-	return ioutil.ReadFile(filePath)
+	return os.ReadFile(filePath)
 }
 
 func CreateDashboard(grafanaURL, auth string, dashboardData []byte) (DashboardResponse, error) {
@@ -36,7 +41,7 @@ func CreateDashboard(grafanaURL, auth string, dashboardData []byte) (DashboardRe
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return response, err
 	}
@@ -67,7 +72,7 @@ func FetchDashboard(grafanaURL, auth, dashboardID string) ([]byte, error) {
 	}
 	defer resp.Body.Close()
 
-	return ioutil.ReadAll(resp.Body)
+	return io.ReadAll(resp.Body)
 }
 
 func CreateSnapshot(grafanaURL, auth string, dashboardData []byte) (string, error) {
@@ -82,7 +87,7 @@ func CreateSnapshot(grafanaURL, auth string, dashboardData []byte) (string, erro
 		return "", err
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -127,7 +132,7 @@ func CreateGrafanaDataSource(grafanaURL, auth string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -170,7 +175,7 @@ func FetchGrafanaDataSourceUID(grafanaURL, auth string) (string, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -192,4 +197,14 @@ func FetchGrafanaDataSourceUID(grafanaURL, auth string) (string, error) {
 	}
 
 	return "", fmt.Errorf("data source not found: %s", "Numaflow-PerfMan-Prometheus")
+}
+
+func GetAdminPassword(kubeClient *kubernetes.Clientset, namespace string, serviceName string, secretKey string) (string, error) {
+	secret, err := kubeClient.CoreV1().Secrets(namespace).Get(context.TODO(), serviceName, metav1.GetOptions{})
+	if err != nil {
+		return "", fmt.Errorf("unable to retrieve password: %w", err)
+	}
+
+	data := secret.Data[secretKey]
+	return string(data), nil
 }

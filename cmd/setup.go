@@ -1,15 +1,12 @@
 package cmd
 
 import (
-	"context"
 	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 
 	"github.com/ayildirim21/numaflow-perfman/setup"
-	"github.com/ayildirim21/numaflow-perfman/setup/portforward"
 	"github.com/ayildirim21/numaflow-perfman/util"
 )
 
@@ -69,6 +66,18 @@ var setupCmd = &cobra.Command{
 			return fmt.Errorf("failed to install prometheus operator: %w", err)
 		}
 
+		// Install Grafana
+		grafanaChart := setup.ChartRelease{
+			ChartName:   "grafana",
+			ReleaseName: "perfman-grafana",
+			RepoUrl:     "https://grafana.github.io/helm-charts",
+			Namespace:   util.DefaultNamespace,
+			Values:      nil,
+		}
+		if err := grafanaChart.InstallOrUpgradeRelease(kubeClient, log); err != nil {
+			return fmt.Errorf("unable to install grafana: %w", err)
+		}
+
 		// Install service monitors
 		svGvro := setup.GVRObject{
 			Group:     "monitoring.coreos.com",
@@ -84,33 +93,6 @@ var setupCmd = &cobra.Command{
 		if err := svGvro.CreateResource("setup/isbvc-jetstream-metrics.yaml", dynamicClient, log); err != nil {
 			return fmt.Errorf("failed to create service monitor for jetstream metrics: %w", err)
 		}
-
-		// Port forward prometheus operator to localhost:9090, so that it can be used as a source in Grafana dashboard
-		options := []*portforward.Option{
-			{
-				LocalPort:   9090,
-				RemotePort:  9090,
-				ServiceName: "perfman-kube-prometheus-prometheus",
-				Source:      "svc/perfman-kube-prometheus-prometheus",
-				Namespace:   util.DefaultNamespace,
-			},
-		}
-
-		ret, err := portforward.Forwarders(context.TODO(), options, config, kubeClient, log)
-		if err != nil {
-			return fmt.Errorf("failed to portforward %s: %w", options[0].Source, err)
-		}
-
-		defer ret.Close()
-
-		ports, err := ret.Ready()
-		if err != nil {
-			return fmt.Errorf("failed to get ports: %w", err)
-		}
-
-		log.Info("successfully port forwarding prometheus operator to localhost:9090", zap.Any("ports", ports))
-
-		ret.Wait()
 
 		return nil
 	},
