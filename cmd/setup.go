@@ -68,8 +68,6 @@ var setupCmd = &cobra.Command{
 
 		// Install Grafana
 		// TODO: figure out how to sync k8s secret with updated password
-		// recommended way of changing password is not through web UI, but updating grafana deployment with helm
-		// and setting new password
 		grafanaChart := setup.ChartRelease{
 			ChartName:   "grafana",
 			ReleaseName: "perfman-grafana",
