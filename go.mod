@@ -7,7 +7,6 @@ toolchain go1.22.3
 require (
 	github.com/spf13/cobra v1.8.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/sync v0.6.0
 	helm.sh/helm/v3 v3.15.0
 	k8s.io/api v0.30.1
 	k8s.io/apimachinery v0.30.1
@@ -124,6 +123,7 @@ require (
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.15.0 // indirect
+	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
