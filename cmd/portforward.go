@@ -125,7 +125,7 @@ var portforwardCmd = &cobra.Command{
 				}
 			}()
 
-			grafanaPassword, err := report.GetAdminPassword(kubeClient, util.DefaultNamespace, "perfman-grafana", "admin-password")
+			grafanaPassword, err := report.GetAdminPassword(kubeClient, util.PerfmanNamespace, "perfman-grafana", "admin-password")
 			if err != nil {
 				return err
 			}
