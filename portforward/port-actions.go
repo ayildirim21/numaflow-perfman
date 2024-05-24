@@ -58,7 +58,7 @@ func (req *APodRequest) PortForwardAPod() error {
 	return fw.ForwardPorts()
 }
 
-func TerminatePortForward(stopCh chan struct{}, wg *sync.WaitGroup) {
+func WaitForTermination(stopCh chan struct{}, wg *sync.WaitGroup) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
