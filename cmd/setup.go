@@ -47,7 +47,7 @@ var setupCmd = &cobra.Command{
 				Group:     "numaflow.numaproj.io",
 				Version:   "v1alpha1",
 				Resource:  "interstepbufferservices",
-				Namespace: util.DefaultNamespace,
+				Namespace: util.PerfmanNamespace,
 			}
 			if err := isbGvro.CreateResource("default/isbvc.yaml", dynamicClient, log); err != nil {
 				return fmt.Errorf("failed to create jetsream-isbvc: %w", err)
@@ -59,7 +59,7 @@ var setupCmd = &cobra.Command{
 			ChartName:   "kube-prometheus",
 			ReleaseName: "perfman-kube-prometheus",
 			RepoUrl:     "https://charts.bitnami.com/bitnami",
-			Namespace:   util.DefaultNamespace,
+			Namespace:   util.PerfmanNamespace,
 			Values:      nil,
 		}
 		if err := kubePrometheusChart.InstallOrUpgradeRelease(kubeClient, log); err != nil {
@@ -71,7 +71,7 @@ var setupCmd = &cobra.Command{
 			ChartName:   "grafana",
 			ReleaseName: "perfman-grafana",
 			RepoUrl:     "https://grafana.github.io/helm-charts",
-			Namespace:   util.DefaultNamespace,
+			Namespace:   util.PerfmanNamespace,
 			Values:      nil,
 		}
 		if err := grafanaChart.InstallOrUpgradeRelease(kubeClient, log); err != nil {
@@ -83,9 +83,9 @@ var setupCmd = &cobra.Command{
 			Group:     "monitoring.coreos.com",
 			Version:   "v1",
 			Resource:  "servicemonitors",
-			Namespace: util.DefaultNamespace,
+			Namespace: util.PerfmanNamespace,
 		}
-		// TODO: check if service monitors exist before applying them
+
 		if err := svGvro.CreateResource("default/pipeline-metrics.yaml", dynamicClient, log); err != nil {
 			return fmt.Errorf("failed to create service monitor for pipeline metrics: %w", err)
 		}

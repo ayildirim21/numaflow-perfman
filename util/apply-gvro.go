@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"go.uber.org/zap"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -41,11 +42,22 @@ func (gvro *GVRObject) CreateResource(filename string, dynamicClient *dynamic.Dy
 	}
 
 	gvr := schema.GroupVersionResource{Group: gvro.Group, Version: gvro.Version, Resource: gvro.Resource}
+	resourceInterface := dynamicClient.Resource(gvr).Namespace(gvro.Namespace)
+
+	// Check if resource already exists
+	existing, err := resourceInterface.Get(context.TODO(), obj.GetName(), metav1.GetOptions{})
+	if err == nil {
+		logger.Info("Resource already exists, skipping creation", zap.String("resource-name", existing.GetName()))
+		return nil
+	} else if !errors.IsNotFound(err) {
+		return fmt.Errorf("failed to check if resource exists: %w", err)
+	}
+
 	result, err := dynamicClient.Resource(gvr).Namespace(gvro.Namespace).Create(context.TODO(), obj, metav1.CreateOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to create resource: %w", err)
 	}
 
-	logger.Info("Applied resource", zap.String("name", result.GetName()))
+	logger.Info("Applied resource", zap.String("resource-name", result.GetName()))
 	return nil
 }

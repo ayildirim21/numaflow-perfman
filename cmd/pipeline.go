@@ -18,7 +18,7 @@ var pipelineCmd = &cobra.Command{
 			Group:     "numaflow.numaproj.io",
 			Version:   "v1alpha1",
 			Resource:  "pipelines",
-			Namespace: util.DefaultNamespace,
+			Namespace: util.PerfmanNamespace,
 		}
 
 		if err := pipelineGvro.CreateResource("default/pipeline.yaml", dynamicClient, log); err != nil {

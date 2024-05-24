@@ -48,8 +48,8 @@ var portforwardCmd = &cobra.Command{
 
 		// Port forward prometheus operator so that it can be used as a source in the Grafana dashboard
 		if cmd.Flag("prometheus").Changed {
-			serviceName := "perfman-kube-prometheus-prometheus"
-			podName, err := portforward.GetPodFromService(kubeClient, util.DefaultNamespace, serviceName)
+			serviceName := util.PrometheusPFServiceName
+			podName, err := portforward.GetPodFromService(kubeClient, util.PerfmanNamespace, serviceName)
 			if err != nil {
 				return fmt.Errorf("unable to find a pod for the service: %w", err)
 			}
@@ -64,7 +64,7 @@ var portforwardCmd = &cobra.Command{
 				Pod: v1.Pod{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      podName,
-						Namespace: util.DefaultNamespace,
+						Namespace: util.PerfmanNamespace,
 					},
 				},
 				LocalPort: 9090,
@@ -90,8 +90,8 @@ var portforwardCmd = &cobra.Command{
 
 		// Port forward Grafana
 		if cmd.Flag("grafana").Changed {
-			serviceName := "perfman-grafana"
-			podName, err := portforward.GetPodFromService(kubeClient, util.DefaultNamespace, serviceName)
+			serviceName := util.GrafanaPFServiceName
+			podName, err := portforward.GetPodFromService(kubeClient, util.PerfmanNamespace, serviceName)
 			if err != nil {
 				return fmt.Errorf("unable to find a pod for the service: %w", err)
 			}
@@ -106,7 +106,7 @@ var portforwardCmd = &cobra.Command{
 				Pod: v1.Pod{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      podName,
-						Namespace: util.DefaultNamespace,
+						Namespace: util.PerfmanNamespace,
 					},
 				},
 				LocalPort: 3000,
