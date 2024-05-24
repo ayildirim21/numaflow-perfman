@@ -11,6 +11,8 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+
+	"github.com/ayildirim21/numaflow-perfman/util"
 )
 
 type DashboardResponse struct {
@@ -103,10 +105,11 @@ func CreateSnapshot(grafanaURL, auth string, dashboardData []byte) (string, erro
 // and creates a new Grafana data source called Numaflow-PerfMan-Prometheus connecting to prometheus.
 // It returns the uid of the created data source.
 func CreateGrafanaDataSource(grafanaURL, auth string) (string, error) {
+
 	dataSource := map[string]interface{}{
 		"name":      "Numaflow-PerfMan-Prometheus",
 		"type":      "prometheus",
-		"url":       "http://localhost:9090",
+		"url":       fmt.Sprintf("http://%s:9090", util.PrometheusPFServiceName),
 		"access":    "proxy",
 		"isDefault": false,
 	}

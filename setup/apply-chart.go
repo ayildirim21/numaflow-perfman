@@ -14,6 +14,7 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 	"helm.sh/helm/v3/pkg/storage/driver"
 	v1 "k8s.io/api/core/v1"
+	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 )
@@ -40,18 +41,33 @@ func getChart(chartPathOption action.ChartPathOptions, chartName string, setting
 	return c, nil
 }
 
+func createNamespace(kubeClient *kubernetes.Clientset, namespace string, ns *v1.Namespace, log *zap.Logger) error {
+	_, err := kubeClient.CoreV1().Namespaces().Get(context.TODO(), namespace, metav1.GetOptions{})
+	if err == nil {
+		log.Info("namespace already exists", zap.String("namespace", namespace))
+		return nil
+	}
+
+	if !kerrors.IsNotFound(err) {
+		return fmt.Errorf("failed to get namespace %s: %w", namespace, err)
+	}
+
+	if _, err := kubeClient.CoreV1().Namespaces().Create(context.TODO(), ns, metav1.CreateOptions{}); err != nil {
+		return fmt.Errorf("failed to create namespace %s: %w", namespace, err)
+	}
+
+	return nil
+}
+
 func (cr *ChartRelease) InstallOrUpgradeRelease(kubeClient *kubernetes.Clientset, log *zap.Logger) error {
-	nsName := &v1.Namespace{
+	ns := &v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: cr.Namespace,
 		},
 	}
 
-	if _, err := kubeClient.CoreV1().Namespaces().Get(context.TODO(), cr.Namespace, metav1.GetOptions{}); err != nil {
-		// if namespace does not exist, create it
-		if _, err := kubeClient.CoreV1().Namespaces().Create(context.TODO(), nsName, metav1.CreateOptions{}); err != nil {
-			return fmt.Errorf("failed to create namespace %s: %w", cr.Namespace, err)
-		}
+	if err := createNamespace(kubeClient, cr.Namespace, ns, log); err != nil {
+		return err
 	}
 
 	settings := cli.New()

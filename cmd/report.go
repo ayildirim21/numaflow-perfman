@@ -21,7 +21,7 @@ var reportCmd = &cobra.Command{
 		grafanaURL := "http://localhost:3000"
 		filePath := "default/dashboard-template.json" // the path to default dashboard template file.
 		username := "admin"
-		password, err := report.GetAdminPassword(kubeClient, util.DefaultNamespace, "perfman-grafana", "admin-password")
+		password, err := report.GetAdminPassword(kubeClient, util.PerfmanNamespace, "perfman-grafana", "admin-password")
 		if err != nil {
 			return err
 		}
